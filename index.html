@@ -76,9 +76,6 @@
       box-sizing: border-box;
     }
 
-    /* 🎯 調整 Grid 欄寬：
-       將 Col 2 與 Col 8 (縱向 ell 橘色欄位) 由 50px 放大至 65px，避免文字溢出
-    */
     .combined-grid {
       display: grid;
       grid-template-columns: 45px 65px repeat(2, 1fr) 1fr repeat(2, 1fr) 65px 45px 40px;
@@ -139,7 +136,7 @@
       pointer-events: none;
     }
 
-    /* 🎯 讓 Dipole 圖片區域與影片單元格保持相同的容器與縮放設定 */
+    /* 🎯 Dipole 圖片區域：放大 1.1 倍 (scale 1.1) */
     .dipole-cell {
       position: relative;
       width: 100%;
@@ -153,7 +150,8 @@
     .dipole-cell img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* 完整顯示圖片內容不變形 */
+      object-fit: contain;
+      transform: scale(1.1); /* 放大 0.1 倍 */
       display: block;
     }
 
@@ -279,7 +277,7 @@
       <div class="j-overlay">$1/2$</div>
     </div>
 
-    <!-- 中間欄：放置 Dipole_figure.png (使其佔據與影片等大的格位) -->
+    <!-- 中間欄：放置放大 1.1 倍的 Dipole_figure.png -->
     <div class="dipole-cell" style="grid-column: 5; grid-row: 4 / span 2;">
       <img src="Dipole_figure.png" alt="Dipole figure" />
     </div>
