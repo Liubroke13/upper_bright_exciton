@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VVB Wave Animations Matrix</title>
+  <title>VVB Wave Animations Matrix Layout</title>
   
-  <!-- 配置並載入 MathJax 3 (SVG 渲染引擎) -->
+  <!-- 配置 MathJax 3 (SVG 渲染引擎) -->
   <script>
     window.MathJax = {
       tex: {
@@ -14,6 +14,13 @@
       },
       svg: {
         fontCache: 'global'
+      },
+      startup: {
+        pageReady: () => {
+          return MathJax.startup.defaultPageReady().then(() => {
+            console.log('MathJax initial typesetting complete');
+          });
+        }
       }
     };
   </script>
@@ -22,14 +29,21 @@
   </script>
 
   <style>
+    html {
+      overflow-x: auto;
+    }
+
     body {
       font-family: 'Times New Roman', Times, serif;
       background-color: #ffffff;
       color: #000000;
-      margin: 15px;
+      margin: 0;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-width: min-content;
+      overflow-x: auto;
     }
 
     .rotate-notice {
@@ -43,7 +57,7 @@
       text-align: center;
       font-size: 0.95rem;
       width: 100%;
-      max-width: 1400px;
+      max-width: 1280px;
       box-sizing: border-box;
     }
 
@@ -55,71 +69,52 @@
 
     .page-container {
       width: 100%;
-      max-width: 1480px;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: nowrap;
-    }
-
-    .matrix-wrapper {
-      flex: 1;
-      min-width: 620px;
+      min-width: 1000px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      box-sizing: border-box;
     }
 
-    .matrix-title {
-      font-size: 1.35rem;
-      text-align: center;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-      min-height: 2.5em;
-    }
-
-    /* Grid 佈局：將側欄欄寬定為 65px，確保 ℓ = -1 不換行 */
-    .animation-grid {
+    .combined-grid {
       display: grid;
-      grid-template-columns: 45px 65px repeat(3, 1fr) 38px;
-      grid-template-rows: 32px 32px repeat(2, 1fr);
-      gap: 2px;
+      grid-template-columns: 45px 50px repeat(2, 1fr) 100px repeat(2, 1fr) 50px 45px 40px;
+      grid-template-rows: auto 30px 30px auto auto;
+      gap: 3px;
       background-color: #ffffff;
       width: 100%;
+      box-sizing: border-box;
     }
 
     .grid-cell {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .matrix-title {
+      font-size: 1.15rem;
+      text-align: center;
+      padding: 4px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .grey-banner {
-      background-color: #a6a6a6;
-      color: #000000;
+      background-color: #808080;
+      color: #ffffff;
       font-weight: bold;
     }
 
-    .sigma-top {
-      grid-column: 3 / span 3;
-      grid-row: 1;
-    }
-
-    .sigma-left {
-      grid-column: 1;
-      grid-row: 3 / span 2;
-    }
-
-    .blue-cell {
-      background-color: #8faadc;
+    .orange-cell {
+      background-color: #f8cbad;
       color: #000000;
       font-weight: bold;
+      border: 1px solid #c55a11;
     }
 
     .video-cell {
@@ -137,107 +132,85 @@
       object-fit: cover;
       display: block;
       pointer-events: none;
-      -webkit-transform: translateZ(0);
     }
 
-    video::-webkit-media-controls { display: none !important; }
-    video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none !important; }
+    .center-arrow-cell {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
 
-    /* 圖形右下角 J 標籤 */
+    .center-arrow-cell img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
     .j-overlay {
       position: absolute;
       bottom: 4px;
       right: 6px;
-      color: #000000;
-      font-size: 1.05rem;
+      color: #ffffff;
+      font-size: 1.1rem;
       pointer-events: none;
-      background-color: rgba(255, 255, 255, 0.85);
-      padding: 0px 5px;
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       z-index: 10;
     }
 
-    /* 左下角 Scale 標籤 */
     .scale-overlay {
       position: absolute;
-      bottom: 22px;
+      bottom: 4px;
       left: 6px;
-      color: #000000;
-      font-size: 1.05rem;
+      color: #ffffff;
+      font-size: 0.95rem;
       pointer-events: none;
-      background-color: rgba(255, 255, 255, 0.85);
-      padding: 0px 4px;
-      border-radius: 2px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       z-index: 10;
     }
 
     .colorbar-wrapper {
-      grid-column: 6;
-      grid-row: 3 / span 2;
       display: flex;
       flex-direction: column;
       align-items: center;
       height: 100%;
-      margin-left: 6px;
+      margin-left: 2px;
     }
 
     .colorbar-tick {
-      font-size: 1.05rem;
+      font-size: 1rem;
       line-height: 1;
       margin: 2px 0;
     }
 
-    .colorbar-graphic-green {
-      width: 18px;
+    .colorbar-graphic {
+      width: 14px;
       flex-grow: 1;
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
       background: linear-gradient(to bottom, 
-        #00441b 0%, 
-        #1b7837 20%, 
-        #f7f7f7 50%, 
-        #762a83 80%, 
-        #40004b 100%
-      );
-      border: 1px solid #000000;
-    }
-
-    .colorbar-graphic-yellow {
-      width: 18px;
-      flex-grow: 1;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to bottom, 
-        #ffff00 0%, 
+        #f28e8e 0%, 
         #000000 50%, 
-        #800080 100%
+        #66c2a5 100%
       );
       border: 1px solid #000000;
     }
 
-    .colorbar-graphic-green .colorbar-inside-label,
-    .colorbar-graphic-yellow .colorbar-inside-label {
+    .colorbar-graphic .colorbar-inside-label {
       writing-mode: vertical-rl;
       transform: rotate(180deg);
       font-size: 0.85rem;
+      color: #ffffff;
       pointer-events: none;
     }
 
-    .colorbar-graphic-green .colorbar-inside-label { color: #000000; }
-    .colorbar-graphic-yellow .colorbar-inside-label { color: #ffffff; text-shadow: 0 0 2px #000000; }
-
     .footer-subtitle {
       font-size: 0.95rem;
-      text-align: center;
-      margin-top: 8px;
+      text-align: left;
+      margin-top: 12px;
+      width: 100%;
     }
   </style>
 </head>
@@ -249,181 +222,125 @@
 
 <div class="page-container">
 
-  <!-- ==================== LEFT MATRIX ==================== -->
-  <div class="matrix-wrapper">
-    <div class="matrix-title">
-      $\text{Re}[\tilde{\mathcal{A}}_{\sigma,\ell,\sigma',\ell'}^z(\boldsymbol{q}_\parallel, t; \alpha, \beta)]$
+  <div class="combined-grid">
+    <!-- ROW 1: 頂部公式與中間標題 -->
+    <div class="matrix-title" style="grid-column: 3 / span 2; grid-row: 1;">
+      $$\text{Re}\left[\tilde{\mathcal{A}}_{\sigma,\ell,\sigma',\ell'}^I(\boldsymbol{q}_\parallel, t; \alpha, \beta)\right]$$
+    </div>
+    <div class="matrix-title" style="grid-column: 5; grid-row: 1;">
+      $$\boldsymbol{D}^{B+,\boldsymbol{Q}}$$
+    </div>
+    <div class="matrix-title" style="grid-column: 6 / span 2; grid-row: 1;">
+      $$\text{Re}\left[\tilde{M}_{\sigma,\ell,\sigma',\ell'}^{B+,\boldsymbol{Q}}(\boldsymbol{Q}, t; \alpha, \beta)\right]$$
     </div>
 
-    <div class="animation-grid">
-      <div class="grid-cell grey-banner sigma-top">
-        $\sigma' = -1$
-      </div>
-
-      <div class="grid-cell blue-cell" style="grid-column: 3; grid-row: 2;">
-        $\ell' = 0$
-      </div>
-      <div class="grid-cell blue-cell" style="grid-column: 4; grid-row: 2;">
-        $\ell' = 1$
-      </div>
-      <div class="grid-cell blue-cell" style="grid-column: 5; grid-row: 2;">
-        $\ell' = 2$
-      </div>
-
-      <div class="grid-cell grey-banner sigma-left">
-        $\sigma = 1$
-      </div>
-
-      <!-- ROW 1: l = -1 -->
-      <div class="grid-cell blue-cell" style="grid-column: 2; grid-row: 3;">
-        $\ell = -1$
-      </div>
-
-      <div class="video-cell" style="grid-column: 3; grid-row: 3;">
-        <!-- 已修正檔名為資料夾中的實際檔案 l_-1_lp_0_longitudinal.mp4 -->
-        <video src="l_-1_lp_0_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="scale-overlay">$0.1Q_c$</div>
-        <div class="j-overlay">$\bar{J} = -1/2$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 4; grid-row: 3;">
-        <video src="l_-1_lp_1_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$0$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 5; grid-row: 3;">
-        <video src="l_-1_lp_2_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1/2$</div>
-      </div>
-
-      <!-- ROW 2: l = 0 -->
-      <div class="grid-cell blue-cell" style="grid-column: 2; grid-row: 4;">
-        $\ell = 0$
-      </div>
-
-      <div class="video-cell" style="grid-column: 3; grid-row: 4;">
-        <video src="l_0_lp_0_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$0$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 4; grid-row: 4;">
-        <video src="l_0_lp_1_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1/2$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 5; grid-row: 4;">
-        <video src="l_0_lp_2_longitudinal.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1$</div>
-      </div>
-
-      <!-- COLORBAR GREEN -->
-      <div class="colorbar-wrapper">
-        <div class="colorbar-tick">$1$</div>
-        <div class="colorbar-graphic-green">
-          <div class="colorbar-inside-label">a.u.</div>
-        </div>
-        <div class="colorbar-tick">$-1$</div>
-      </div>
+    <!-- ROW 2: 灰色 σ' = -1 Banner -->
+    <div class="grid-cell grey-banner" style="grid-column: 3 / span 2; grid-row: 2;">
+      $\sigma' = -1$
+    </div>
+    <div class="grid-cell grey-banner" style="grid-column: 6 / span 2; grid-row: 2;">
+      $\sigma' = -1$
     </div>
 
-    <div class="footer-subtitle">
-      In the above figures : $\alpha = 0, \beta = \pi/2$ (figures are plotted without the approximation)
+    <!-- ROW 3: 橘色 ℓ' 標籤欄 (ℓ' = 1, 2) -->
+    <div class="grid-cell orange-cell" style="grid-column: 3; grid-row: 3;">$\ell' = 1$</div>
+    <div class="grid-cell orange-cell" style="grid-column: 4; grid-row: 3;">$\ell' = 2$</div>
+    
+    <div class="grid-cell orange-cell" style="grid-column: 6; grid-row: 3;">$\ell' = 1$</div>
+    <div class="grid-cell orange-cell" style="grid-column: 7; grid-row: 3;">$\ell' = 2$</div>
+
+    <!-- 左側與右側縱向 σ = 1 灰色 Banner -->
+    <div class="grid-cell grey-banner" style="grid-column: 1; grid-row: 4 / span 2;">
+      $\sigma = 1$
     </div>
+    <div class="grid-cell grey-banner" style="grid-column: 9; grid-row: 4 / span 2;">
+      $\sigma = 1$
+    </div>
+
+    <!-- ROW 4: ℓ = -1 行 -->
+    <div class="grid-cell orange-cell" style="grid-column: 2; grid-row: 4;">
+      $\ell = -1$
+    </div>
+    <div class="video-cell" style="grid-column: 3; grid-row: 4;">
+      <video src="A_l_-1_lp_1.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$\bar{\ell} = 0$</div>
+    </div>
+    <div class="video-cell" style="grid-column: 4; grid-row: 4;">
+      <video src="A_l_-1_lp_2.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1/2$</div>
+    </div>
+
+    <!-- 中間欄：加入 Dipole_figure.png 圖片 -->
+    <div class="center-arrow-cell" style="grid-column: 5; grid-row: 4 / span 2;">
+      <img src="Dipole_figure.png" alt="Dipole figure" />
+    </div>
+
+    <div class="video-cell" style="grid-column: 6; grid-row: 4;">
+      <video src="M_l_-1_lp_1.mp4" autoplay muted loop playsinline></video>
+      <div class="scale-overlay">$0.1Q_c$</div>
+      <div class="j-overlay">$\bar{\ell} = 0$</div>
+    </div>
+    <div class="video-cell" style="grid-column: 7; grid-row: 4;">
+      <video src="M_l_-1_lp_2.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1/2$</div>
+    </div>
+    <div class="grid-cell orange-cell" style="grid-column: 8; grid-row: 4;">
+      $\ell = -1$
+    </div>
+
+    <!-- ROW 5: ℓ = 0 行 -->
+    <div class="grid-cell orange-cell" style="grid-column: 2; grid-row: 5;">
+      $\ell = 0$
+    </div>
+    <div class="video-cell" style="grid-column: 3; grid-row: 5;">
+      <video src="A_l_0_lp_1.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1/2$</div>
+    </div>
+    <div class="video-cell" style="grid-column: 4; grid-row: 5;">
+      <video src="A_l_0_lp_2.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1$</div>
+    </div>
+
+    <div class="video-cell" style="grid-column: 6; grid-row: 5;">
+      <video src="M_l_0_lp_1.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1/2$</div>
+    </div>
+    <div class="video-cell" style="grid-column: 7; grid-row: 5;">
+      <video src="M_l_0_lp_2.mp4" autoplay muted loop playsinline></video>
+      <div class="j-overlay">$1$</div>
+    </div>
+    <div class="grid-cell orange-cell" style="grid-column: 8; grid-row: 5;">
+      $\ell = 0$
+    </div>
+
+    <!-- 最右側 COLORBAR -->
+    <div class="colorbar-wrapper" style="grid-column: 10; grid-row: 4 / span 2;">
+      <div class="colorbar-tick">$1$</div>
+      <div class="colorbar-graphic">
+        <div class="colorbar-inside-label">a.u.</div>
+      </div>
+      <div class="colorbar-tick">$-1$</div>
+    </div>
+
   </div>
 
-
-  <!-- ==================== RIGHT MATRIX ==================== -->
-  <div class="matrix-wrapper">
-    <div class="matrix-title">
-      $\text{Re}[\tilde{M}_{\sigma,\ell,\sigma',\ell'}^{S,\boldsymbol{Q}}(\boldsymbol{Q}, t; \alpha, \beta)]$
-    </div>
-
-    <div class="animation-grid">
-      <div class="grid-cell grey-banner sigma-top">
-        $\sigma' = -1$
-      </div>
-
-      <div class="grid-cell blue-cell" style="grid-column: 3; grid-row: 2;">
-        $\ell' = 0$
-      </div>
-      <div class="grid-cell blue-cell" style="grid-column: 4; grid-row: 2;">
-        $\ell' = 1$
-      </div>
-      <div class="grid-cell blue-cell" style="grid-column: 5; grid-row: 2;">
-        $\ell' = 2$
-      </div>
-
-      <div class="grid-cell grey-banner sigma-left">
-        $\sigma = 1$
-      </div>
-
-      <!-- ROW 1: l = -1 -->
-      <div class="grid-cell blue-cell" style="grid-column: 2; grid-row: 3;">
-        $\ell = -1$
-      </div>
-
-      <div class="video-cell" style="grid-column: 3; grid-row: 3;">
-        <video src="gray_l1_-1_l2_0.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="scale-overlay">$0.1Q_c$</div>
-        <div class="j-overlay">$\bar{J} = -1/2$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 4; grid-row: 3;">
-        <video src="gray_l1_-1_l2_1.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$0$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 5; grid-row: 3;">
-        <video src="gray_l1_-1_l2_2.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1/2$</div>
-      </div>
-
-      <!-- ROW 2: l = 0 -->
-      <div class="grid-cell blue-cell" style="grid-column: 2; grid-row: 4;">
-        $\ell = 0$
-      </div>
-
-      <div class="video-cell" style="grid-column: 3; grid-row: 4;">
-        <video src="gray_l1_0_l2_0.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$0$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 4; grid-row: 4;">
-        <video src="gray_l1_0_l2_1.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1/2$</div>
-      </div>
-
-      <div class="video-cell" style="grid-column: 5; grid-row: 4;">
-        <video src="gray_l1_0_l2_2.mp4" autoplay muted loop playsinline webkit-playsinline></video>
-        <div class="j-overlay">$1$</div>
-      </div>
-
-      <!-- COLORBAR YELLOW -->
-      <div class="colorbar-wrapper">
-        <div class="colorbar-tick">$1$</div>
-        <div class="colorbar-graphic-yellow">
-          <div class="colorbar-inside-label">a.u.</div>
-        </div>
-        <div class="colorbar-tick">$-1$</div>
-      </div>
-    </div>
-
-    <div class="footer-subtitle">
-      In the above figures : $\alpha = 0, \beta = \pi/2$ (figures are plotted without the approximation)
-    </div>
+  <!-- 頁腳註解 -->
+  <div class="footer-subtitle">
+    In the above figures : $\alpha = 0, \beta = \frac{\pi}{2}, \Delta\sigma = -2$ (figures are plotted <strong>without</strong> the approximation)
   </div>
 
 </div>
 
 <script>
-  // 確保瀏覽器自動播放所有影片
   document.addEventListener("DOMContentLoaded", () => {
     const videos = document.querySelectorAll('video');
     videos.forEach(v => {
-      v.play().catch(() => {
-        // 防止瀏覽器擋下靜音自動播放
-      });
+      v.play().catch(() => {});
     });
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
   });
 </script>
 
